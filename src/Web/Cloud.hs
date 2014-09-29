@@ -22,7 +22,7 @@ execParserWebCloud pinfo = do
         output $ title ++ "<code><pre>" ++ e
       Right v -> do
         liftIO $ writeIORef ref (Just v)
-        output $ title ++ "<code>"
+        output $ title ++ "<code><pre>"
   r <- readIORef ref
   case r of
     Just v -> return v
