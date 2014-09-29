@@ -9,4 +9,4 @@ Turn an optparse-applicative program into a CGI program!
 2. Change `execParser` to `execParserWebCloud`
 3. Done!
 
-![Web Cloud in Action](http://i.imgur.com/SnQ78t0.png)
+![Web Cloud in Action](http://i.imgur.com/d48WKKc.png)
