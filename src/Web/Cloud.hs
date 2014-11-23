@@ -41,7 +41,7 @@ getCloud =
     case unpack (inputValue v) of
       ""   -> []
       "on" -> ["--" ++ k]
-      _    -> ["--" ++ k, show (inputValue v)]
+      v'   -> ["--" ++ k, v']
 
 mkWebCloud :: Monad m => ParserResult a -> m (Either String a)
 mkWebCloud (Success a) = return (Right a)
