@@ -18,7 +18,7 @@ execParserWebCloud pinfo = do
   title <- (\x -> "<title>" ++ x ++ "</title>") `fmap` getProgName
   runCGI . handleErrors $ do
     setHeader "Content-Type" "text/html; charset=utf-8" 
-    clouds <- cgiGet (execParserPure (prefs idm) pinfo . getCloud . cgiInputs)
+    clouds <- cgiGet (execParserPure (prefs idm) pinfo . getCloud (infoParser pinfo) . cgiInputs)
     val <- mkWebCloud clouds
     case val of
       Left e -> do
@@ -35,13 +35,28 @@ execParserWebCloud pinfo = do
     Just v -> return v
     Nothing -> exitWith ExitSuccess -- it's ok to error! :)
 
-getCloud :: [(String, Input)] -> [String]
-getCloud =
-  (=<<) $ \(k, v) ->
+getCloud :: Parser a -> [(String, Input)] -> [String]
+getCloud p =
+  let o = opts p
+  in (=<<) $ \(k, v) ->
     case unpack (inputValue v) of
       ""   -> []
-      "on" -> ["--" ++ k]
-      v'   -> ["--" ++ k, v']
+      v' -> case (lookup k o, v') of
+        (Just Flag, "on") -> ["--" ++ k]
+        _ -> ["--" ++ k, v']
+
+data OptType = Opt | Flag
+
+opts :: Parser a -> [(String, OptType)]
+opts (NilP _) = []
+opts (OptP opt) =
+  case optMain opt of
+    (OptReader names _ _) -> [(getName names, Opt)]
+    (FlagReader names _) -> [(getName names, Flag)]
+    _ -> [] -- TODO
+opts (MultP pf pa) = opts pf ++ opts pa
+opts (AltP pa pb) = opts pa ++ opts pb
+opts (BindP px pf) = opts px -- TODO: bind... ++ opts pf
 
 mkWebCloud :: Monad m => ParserResult a -> m (Either String a)
 mkWebCloud (Success a) = return (Right a)
