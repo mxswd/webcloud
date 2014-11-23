@@ -2,7 +2,7 @@ module Web.Cloud where
 
 import Data.List
 import Data.IORef
-import Data.ByteString.Lazy.Char8 (pack, unpack)
+import Data.ByteString.Lazy.Char8 (unpack)
 import System.Environment
 import Options.Applicative
 import Options.Applicative.Types
@@ -35,14 +35,13 @@ execParserWebCloud pinfo = do
     Just v -> return v
     Nothing -> exitWith ExitSuccess -- it's ok to error! :)
 
--- getCloud :: [(String, Input)]
+getCloud :: [(String, Input)] -> [String]
 getCloud =
-  flip (>>=) $ \(k, v) ->
-    if unpack (inputValue v) == ""
-      then []
-      else if unpack (inputValue v) == "on"
-        then ["--" ++ k]
-        else ["--" ++ k, show (inputValue v)]
+  (=<<) $ \(k, v) ->
+    case unpack (inputValue v) of
+      ""   -> []
+      "on" -> ["--" ++ k]
+      _    -> ["--" ++ k, show (inputValue v)]
 
 mkWebCloud :: Monad m => ParserResult a -> m (Either String a)
 mkWebCloud (Success a) = return (Right a)
@@ -65,6 +64,7 @@ formatOpt (OptProperties vis halp metavar def) (ArgReader _) =
 formatOpt (OptProperties vis halp metavar def) (CmdReader cmd _) =
   "TODO"
 
+fmt :: Show a => String -> Chunk a -> [OptName] -> Bool -> String
 fmt metavar halp names isFlag =
      "<p>"
   ++ "<strong>--"
@@ -73,6 +73,7 @@ fmt metavar halp names isFlag =
   ++ maybe "" show (unChunk halp)
   ++ "<br/><input type=\"" ++ (if isFlag then "checkbox" else "text") ++ "\" name=\"" ++ getName names ++ "\" placeholder=\"" ++ metavar ++ "\"></input><br/></p>"
 
+getName :: [OptName] -> String
 getName = head . sortBy (\x y -> length y `compare` length x) . map n
    where
      n (OptShort c) = return c
