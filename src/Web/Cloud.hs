@@ -15,11 +15,12 @@ import System.Exit
 execParserWebCloud :: ParserInfo a -> IO a
 execParserWebCloud pinfo = do
   ref <- newIORef Nothing
-  title <- (\x -> "<title>" ++ x ++ "</title>") `fmap` getProgName
+  name <- getProgName
+  let title = "<title>" ++ name ++ "</title>"
   runCGI . handleErrors $ do
     setHeader "Content-Type" "text/html; charset=utf-8" 
     clouds <- cgiGet (execParserPure (prefs idm) pinfo . getCloud (infoParser pinfo) . cgiInputs)
-    val <- mkWebCloud clouds
+    val <- mkWebCloud name clouds
     case val of
       Left e -> do
         output $ title
@@ -58,10 +59,10 @@ opts (MultP pf pa) = opts pf ++ opts pa
 opts (AltP pa pb) = opts pa ++ opts pb
 opts (BindP px pf) = opts px -- TODO: bind... ++ opts pf
 
-mkWebCloud :: Monad m => ParserResult a -> m (Either String a)
-mkWebCloud (Success a) = return (Right a)
-mkWebCloud (Failure failure) = return (Left (fst (renderFailure failure "cloud")))
-mkWebCloud (CompletionInvoked _) = return (Left "not web")
+mkWebCloud :: Monad m => String -> ParserResult a -> m (Either String a)
+mkWebCloud _ (Success a) = return (Right a)
+mkWebCloud name (Failure failure) = return (Left (fst (renderFailure failure name)))
+mkWebCloud _ (CompletionInvoked _) = return (Left "not web")
 
 form :: Parser a -> String
 form (NilP _) = ""
