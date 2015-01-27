@@ -17,13 +17,13 @@ library
   -- other-modules:       
   -- other-extensions:    
   ghc-options:         -Wall
-  build-depends:       base >=4.7 && <4.8, optparse-applicative == 0.10.0, cgi == 3001.2.1.0, bytestring == 0.10.4.0
+  build-depends:       base >=4.7 && <4.8, optparse-applicative >=0.10 && <0.12, cgi == 3001.2.1.0, bytestring == 0.10.4.0
   hs-source-dirs:      src
   default-language:    Haskell2010
 
 executable testcloud
   main-is:             testcloud.hs
   ghc-options:         -Wall
-  build-depends:       base >=4.7 && <4.8, optparse-applicative == 0.10.0, webcloud
+  build-depends:       base >=4.7 && <4.8, optparse-applicative >=0.10 && <0.12, webcloud
   default-language:    Haskell2010
   
