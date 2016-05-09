@@ -1,7 +1,8 @@
 name:                webcloud
 version:             0.1.0.1
--- synopsis:            
--- description:         
+synopsis:            Turn an optparse-applicative program into a CGI program!
+description:         Automatically generate a web interface for your existing
+                     optparse-applicative command line applications.
 license:             BSD2
 license-file:        LICENSE
 author:              Maxwell Swadling
@@ -9,8 +10,13 @@ maintainer:          maxwellswadling@gmail.com
 -- copyright:           
 category:            Web
 build-type:          Simple
--- extra-source-files:  
 cabal-version:       >=1.10
+extra-source-files:  README.md
+                   , stack.yaml
+
+source-repository HEAD
+  type: git
+  location: https://github.com/mxswd/webcloud/
 
 library
   exposed-modules:     Web.Cloud
