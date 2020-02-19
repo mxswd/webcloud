@@ -35,7 +35,7 @@ execParserWebCloud pinfo = do
     Just v -> return v
     Nothing -> exitWith ExitSuccess -- it's ok to error! :)
 
--- getCloud :: [(String, Input)]
+getCloud :: [(String, Input)] -> [String]
 getCloud =
   flip (>>=) $ \(k, v) ->
     if unpack (inputValue v) == ""
@@ -54,25 +54,28 @@ form (NilP _) = ""
 form (OptP opt) = formatOpt (optProps opt) (optMain opt)
 form (MultP pf pa) = form pf ++ form pa
 form (AltP pa pb) = form pa ++ form pb
-form (BindP px pf) = form px -- TODO: bind... ++ form pf
+form (BindP px _pf) = form px -- TODO: bind... ++ form pf
 
-formatOpt (OptProperties vis halp metavar def) (OptReader names _ _) =
-  fmt metavar halp names (getName names == "help")
-formatOpt (OptProperties vis halp metavar def) (FlagReader names _) =
-  fmt metavar halp names True
-formatOpt (OptProperties vis halp metavar def) (ArgReader _) =
+formatOpt :: OptProperties -> OptReader a -> String
+formatOpt (OptProperties _vis halp fmetavar _def _brief) (OptReader names _ _) =
+  fmt fmetavar halp names (getName names == "help")
+formatOpt (OptProperties _vis halp fmetavar _def _brief) (FlagReader names _) =
+  fmt fmetavar halp names True
+formatOpt (OptProperties _vis _halp _metavar _def _brief) (ArgReader _) =
   "TODO"
-formatOpt (OptProperties vis halp metavar def) (CmdReader cmd _) =
+formatOpt (OptProperties _vis _halp _metavar _def _brief) (CmdReader _cmd _ _) =
   "TODO"
 
-fmt metavar halp names isFlag =
+fmt :: Show a => String -> Chunk a -> [OptName] -> Bool -> String
+fmt fmetavar halp names isFlag =
      "<p>"
   ++ "<strong>--"
   ++ getName names
   ++ "</strong><br/>"
   ++ maybe "" show (unChunk halp)
-  ++ "<br/><input type=\"" ++ (if isFlag then "checkbox" else "text") ++ "\" name=\"" ++ getName names ++ "\" placeholder=\"" ++ metavar ++ "\"></input><br/></p>"
+  ++ "<br/><input type=\"" ++ (if isFlag then "checkbox" else "text") ++ "\" name=\"" ++ getName names ++ "\" placeholder=\"" ++ fmetavar ++ "\"></input><br/></p>"
 
+getName :: [OptName] -> [Char]
 getName = head . sortBy (\x y -> length y `compare` length x) . map n
    where
      n (OptShort c) = return c
